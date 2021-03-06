@@ -1,0 +1,145 @@
+services:
+    traefik:
+        image: traefik:2.3
+        container_name: "traefik"
+        command:
+            - "--log.level=DEBUG"
+            - "--api.insecure=true"
+            - "--providers.docker=true"
+            - "--providers.docker.exposedbydefault=false"
+            - "--entrypoints.web.address=:80"
+        ports:
+            - "80:80"
+            - "8080:8080"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        networks:
+            ferror:
+                ipv4_address: 192.168.10.2
+
+    symfony:
+        image: ferror/symfony-image
+        command: ["make", "run"]
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.symfony.rule=Host(`symfony.malcherczyk.localhost`)"
+        volumes:
+            - ./:/app:delegated
+        depends_on:
+            - traefik
+        networks:
+            - ferror
+
+    vue:
+        image: ferror/vue-image
+        command: ["make", "run"]
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.vue.rule=Host(`vue.malcherczyk.localhost`)"
+        volumes:
+            - ./:/app:delegated
+            - ./app/node_modules
+        depends_on:
+            - traefik
+        networks:
+            - ferror
+
+    spring:
+        image: ferror/spring-image
+        command: ["make", "run"]
+        volumes:
+            - ./:/app:delegated
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.spring.rule=Host(`spring.malcherczyk.localhost`)"
+        depends_on:
+            - traefik
+        networks:
+            - ferror
+
+    dynamodb:
+        image: amazon/dynamodb-local:1.11
+        command: ["-jar", "DynamoDBLocal.jar", "-sharedDb"]
+        ports:
+            - "8000:8000"
+        networks:
+            - ferror
+
+    mongodb:
+        image: mongo:4.4
+        ports:
+            - "27017:27017"
+        networks:
+            - ferror
+
+    influxdb:
+        image: influxdb:2.0-alpine
+        ports:
+            - "8086:8086"
+        networks:
+            - ferror
+
+    rethinkdb:
+        image: rethinkdb:2.4
+        ports:
+            - "28015:28015"
+        networks:
+            - ferror
+
+    redis:
+        image: redis:6.0-alpine
+        ports:
+            - "6379:6379"
+        networks:
+            - ferror
+
+    memcached:
+        image: memcached:1.6-alpine
+        ports:
+            - "11211:11211"
+        networks:
+            - ferror
+
+    mysql:
+        image: mysql:8.0
+        ports:
+            - "3306:3306"
+        networks:
+            - ferror
+
+    postgres:
+        image: postgres:13-alpine
+        ports:
+            - "5432:5432"
+        networks:
+            - ferror
+
+    grafana:
+        image: grafana:7.4
+        ports:
+            - ""
+        networks:
+            - ferror
+
+    rabbitmq:
+        image: rabbitmq:3.8
+        ports:
+            - "15672:15672"
+        networks:
+            - ferror
+
+    mailhog:
+        image: mailhog:1.0
+        ports:
+            - "1025:1025"
+        networks:
+            - ferror
+
+networks:
+    ferror:
+        name: ferror
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 192.168.10.0/24
