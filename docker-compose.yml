@@ -116,7 +116,7 @@ services:
     grafana:
         image: grafana:7.4
         ports:
-            - ""
+            - "3000:3000"
         networks:
             - ferror
 
@@ -131,6 +131,14 @@ services:
         image: mailhog:1.0
         ports:
             - "1025:1025"
+        networks:
+            - ferror
+    
+    elasticsearch:
+        image: elasticsearch:7.11
+        ports:
+            - "9200:9200"
+            - "9300:9300"
         networks:
             - ferror
 
