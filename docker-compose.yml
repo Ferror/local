@@ -61,6 +61,8 @@ services:
         command: ["-jar", "DynamoDBLocal.jar", "-sharedDb"]
         ports:
             - "8000:8000"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -68,6 +70,8 @@ services:
         image: mongo:4.4
         ports:
             - "27017:27017"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -75,6 +79,8 @@ services:
         image: influxdb:2.0-alpine
         ports:
             - "8086:8086"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -82,6 +88,8 @@ services:
         image: rethinkdb:2.4
         ports:
             - "28015:28015"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -89,6 +97,8 @@ services:
         image: redis:6.0-alpine
         ports:
             - "6379:6379"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -96,6 +106,8 @@ services:
         image: memcached:1.6-alpine
         ports:
             - "11211:11211"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -103,6 +115,8 @@ services:
         image: mysql:8.0
         ports:
             - "3306:3306"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -110,6 +124,8 @@ services:
         image: postgres:13-alpine
         ports:
             - "5432:5432"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -117,6 +133,8 @@ services:
         image: grafana:7.4
         ports:
             - "3000:3000"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -124,6 +142,8 @@ services:
         image: rabbitmq:3.8
         ports:
             - "15672:15672"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
@@ -131,6 +151,8 @@ services:
         image: mailhog:1.0
         ports:
             - "1025:1025"
+        depends_on:
+            - traefik
         networks:
             - ferror
     
@@ -139,6 +161,8 @@ services:
         ports:
             - "9200:9200"
             - "9300:9300"
+        depends_on:
+            - traefik
         networks:
             - ferror
 
