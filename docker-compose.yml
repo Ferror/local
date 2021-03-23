@@ -122,6 +122,8 @@ services:
 
     postgres:
         image: postgres:13-alpine
+        environment:
+            POSTGRES_PASSWORD: 1234
         ports:
             - "5432:5432"
         depends_on:
