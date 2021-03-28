@@ -84,6 +84,15 @@ services:
         networks:
             - ferror
 
+    timescaledb:
+        image: timescale/timescaledb:2.1.0-pg13
+        ports:
+            - "5433:5433"
+        depends_on:
+            - traefik
+        networks:
+            - ferror
+
     rethinkdb:
         image: rethinkdb:2.4
         ports:
