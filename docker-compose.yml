@@ -84,6 +84,17 @@ services:
         networks:
             - ferror
 
+    timescaledb:
+        image: timescale/timescaledb:2.1.0-pg13
+        ports:
+            - "5433:5432"
+        environment:
+            POSTGRES_PASSWORD: 1234
+        depends_on:
+            - traefik
+        networks:
+            - ferror
+
     rethinkdb:
         image: rethinkdb:2.4
         ports:
