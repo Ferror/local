@@ -179,6 +179,16 @@ services:
         networks:
             - ferror
 
+    openapi:
+        image: redocly/redoc
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.doc.rule=Host(`doc.malcherczyk.localhost`)"
+        depends_on:
+            - traefik
+        networks:
+            - ferror
+
 networks:
     ferror:
         name: ferror
