@@ -1,0 +1,16 @@
+log:
+    level: ERROR
+
+api:
+    insecure: true
+
+entrypoints:
+    web:
+        address: :80
+
+providers:
+    docker:
+        exposedByDefault: true
+        # https://masterminds.github.io/sprig/strings.html
+        # Please define your own routing rules based on local domain
+        defaultRule: "Host(`{{ .Name }}.domain.localhost`)"
