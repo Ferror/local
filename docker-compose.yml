@@ -1,27 +1,19 @@
 services:
     traefik:
-        image: traefik:2.5
-        command:
-            - "--log.level=DEBUG"
-            - "--api.insecure=true"
-            - "--providers.docker=true"
-            - "--providers.docker.exposedbydefault=false"
-            - "--entrypoints.web.address=:80"
+        image: traefik:2.6
         ports:
             - "80:80"
             - "8080:8080"
         volumes:
+            - ./.docker/traefik.yaml:/etc/traefik/traefik.yaml
             - /var/run/docker.sock:/var/run/docker.sock:ro
         networks:
             ferror:
-                ipv4_address: 192.168.10.2
+                ipv4_address: 192.168.14.2
 
     symfony:
-        image: ferror/symfony-image:7.4
+        image: ferror/symfony-image:8.0
         command: ["make", "run"]
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.symfony.rule=Host(`symfony.malcherczyk.localhost`)"
         volumes:
             - ./:/app:delegated
         depends_on:
@@ -32,12 +24,8 @@ services:
     vue:
         image: ferror/vue-image:14
         command: ["make", "run"]
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.vue.rule=Host(`vue.malcherczyk.localhost`)"
         volumes:
             - ./:/app:delegated
-            - ./app/node_modules
         depends_on:
             - traefik
         networks:
@@ -48,16 +36,13 @@ services:
         command: ["make", "run"]
         volumes:
             - ./:/app:delegated
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.spring.rule=Host(`spring.malcherczyk.localhost`)"
         depends_on:
             - traefik
         networks:
             - ferror
 
     dynamodb:
-        image: amazon/dynamodb-local:1.15.0
+        image: amazon/dynamodb-local:1.18.0
         command: ["-jar", "DynamoDBLocal.jar", "-sharedDb"]
         ports:
             - "8000:8000"
@@ -67,7 +52,7 @@ services:
             - ferror
 
     mongodb:
-        image: mongo:4.4
+        image: mongo:5.0
         ports:
             - "27017:27017"
         depends_on:
@@ -76,7 +61,7 @@ services:
             - ferror
 
     influxdb:
-        image: influxdb:2.0-alpine
+        image: influxdb:2.1-alpine
         ports:
             - "8086:8086"
         depends_on:
@@ -85,11 +70,13 @@ services:
             - ferror
 
     timescaledb:
-        image: timescale/timescaledb:2.1.0-pg13
-        ports:
-            - "5433:5432"
+        image: timescale/timescaledb:2.6.0-pg13
         environment:
             POSTGRES_PASSWORD: 1234
+        volumes:
+            - ./.docker:/docker-entrypoint-initdb.d:delegated
+        ports:
+            - "5433:5432"
         depends_on:
             - traefik
         networks:
@@ -97,6 +84,7 @@ services:
 
     rethinkdb:
         image: rethinkdb:2.4
+        platform: linux/amd64
         ports:
             - "28015:28015"
         depends_on:
@@ -105,7 +93,7 @@ services:
             - ferror
 
     redis:
-        image: redis:6.0-alpine
+        image: redis:6.2-alpine
         ports:
             - "6379:6379"
         depends_on:
@@ -124,6 +112,11 @@ services:
 
     mysql:
         image: mysql:8.0
+        platform: linux/amd64
+        environment:
+            - MYSQL_ROOT_PASSWORD=1234
+        volumes:
+            - ./.docker:/docker-entrypoint-initdb.d:delegated
         ports:
             - "3306:3306"
         depends_on:
@@ -135,6 +128,8 @@ services:
         image: postgres:13-alpine
         environment:
             POSTGRES_PASSWORD: 1234
+        volumes:
+            - ./.docker:/docker-entrypoint-initdb.d:delegated
         ports:
             - "5432:5432"
         depends_on:
@@ -143,7 +138,7 @@ services:
             - ferror
 
     grafana:
-        image: grafana/grafana:7.4.1
+        image: grafana/grafana:8.4.4
         ports:
             - "3000:3000"
         depends_on:
@@ -152,7 +147,7 @@ services:
             - ferror
 
     rabbitmq:
-        image: rabbitmq:3.8
+        image: rabbitmq:3.9-alpine
         ports:
             - "15672:15672"
         depends_on:
@@ -170,7 +165,7 @@ services:
             - ferror
     
     elasticsearch:
-        image: elasticsearch:7.11.2
+        image: elasticsearch:8.1.1
         ports:
             - "9200:9200"
             - "9300:9300"
@@ -181,9 +176,6 @@ services:
 
     openapi:
         image: redocly/redoc
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.doc.rule=Host(`doc.malcherczyk.localhost`)"
         depends_on:
             - traefik
         networks:
@@ -196,4 +188,4 @@ networks:
         ipam:
             driver: default
             config:
-                - subnet: 192.168.10.0/24
+                - subnet: 192.168.14.0/24
